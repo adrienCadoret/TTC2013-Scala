@@ -1,0 +1,161 @@
+#+AUTHOR: Tassilo Horn
+#+EMAIL: horn@uni-koblenz.de
+#+TITLE: The TTC 2013 Flowgraphs Case
+#+DATE: June 20th, 2013
+
+#+OPTIONS: num:nil, toc:nil, reveal_progress, reveal_control:t
+#+REVEAL_THEME: night
+#+REVEAL_TRANS: default
+#+REVEAL_HLEVEL: 2
+#+REVEAL_EXTRA_CSS: extra.css
+#+REVEAL_ROOT: http://www.tsdh.org/js/reveal.js
+
+* The 4 Flowgraph Tasks
+
+  1. A *model-to-model transformation* from JaMoPP to a simple StructureGraph
+  2. An *in-place transformation* synthesizing control flow edges
+  3. An *in-place transformation* synthesizing data flow edges
+  4. A *DSL development* task for *validation*
+
+* Task 1
+
+  - Model-to-model transformation
+    + Transform JaMoPP to StructureGraph
+  - Model-to-text transformation
+    + Serialize JaMoPP statements back to text
+
+** Task 1: Metamodels
+
+  - Input metamodel (JaMoPP, complete abstract syntax of Java)
+    - 237 classes,15 attributes, 105 references, 319 specializations
+  - Output metamodel (StructureGraph)
+    [[./StructureGraph.png]]
+
+** Task 1: Models
+
+   - smallest input model: 53 objects, 67 references
+   - largest input model: 48465 objects, 60367 references
+
+** Task 1: Example
+
+#+BEGIN_SRC java
+public class Test1 {
+        public static void testMethod(int a) {
+                int i = a * 2;
+                i = i + 19;
+                while (i > a) {
+                        if (a < 1) {
+                                return;
+                        } else if (a == 1) {
+                                break;
+                        }
+                        i--;
+                }
+        }
+}
+#+END_SRC
+
+** [[./sg.png]]
+
+* Task 2
+
+  - In-place transformation
+  - *Synthesize control flow edges* in the StructureGraphs according to the
+    Java semantics
+  - Not that easy in the presence of deeply nested /if/loops/ with /break/ and
+    /continue/
+
+** Task 2: Metamodel
+
+   [[./ControlFlowGraph.png]]
+
+** [[./sg.png]]
+
+** [[./cfg.png]]
+
+* Task 3
+
+  - Model-to-model transformation
+    + Extend task 1's transformation so that it creates /Var/ objects and sets
+      /def/ and /use/ references
+  - In-place transformation
+    + *Synthesize data flow edges* in the model resulting from applying the
+      extended task 1 transformation + the task 2 transformation
+
+** Task 3: Metamodel
+
+   [[./DataFlowGraph.png]]
+
+** [[./cfg-with-vars.png]]
+
+** [[./dfg.png]]
+
+* Task 4
+
+  - Create a *simple DSL* that allows for
+    + defining *specs of expected control and data flow links*
+    + using a syntax usable by Java programmers not knowing about models
+  - Provide a tool that takes such specs to *validate result model*
+    + Enumerate missing control/data flow links
+    + Enumerate false control/data flow links
+
+** Task 4: Example DSL
+
+#+BEGIN_SRC
+cfNext: "testMethod()"   --> "int a = 1;"
+cfNext: "int a = 1;"     --> "int b = 2;"
+cfNext: "int b = 2;"     --> "int c = a + b;"
+cfNext: "int c = a + b;" --> "a = c;"
+cfNext: "a = c;"         --> "b = a;"
+cfNext: "b = a;"         --> "c = a / b;"
+cfNext: "c = a / b;"     --> "b = a - b;"
+cfNext: "b = a - b;"     --> "return b * c;"
+cfNext: "return b * c;"  --> "Exit"
+
+dfNext: "int a = 1;"     --> "int c = a + b;"
+dfNext: "int b = 2;"     --> "int c = a + b;"
+dfNext: "int c = a + b;" --> "a = c;"
+dfNext: "a = c;"         --> "b = a;"
+dfNext: "a = c;"         --> "c = a / b;"
+dfNext: "a = c;"         --> "b = a - b;"
+dfNext: "b = a;"         --> "c = a / b;"
+dfNext: "b = a;"         --> "b = a - b;"
+dfNext: "c = a / b;"     --> "return b * c;"
+dfNext: "b = a - b;"     --> "return b * c;"
+#+END_SRC
+
+* Evaluation Criteria
+
+** Objective Criteria
+
+   - The objectively measurable criteria have already been assessed in an open
+     peer review
+     - *Completeness*
+     - *Correctness*
+     - *Efficiency*
+
+** Subjective Criteria
+
+   - Have also been assessed in an open peer review, and now you can add your
+     votes, too
+   - *Overall score*
+     + of the solution itself (i.e., its results)
+     + of the solution presentation
+   - *Perceived language quality*
+     + how *useful* do you think it is?
+     + how *easy to use* does it seem to be?
+     + how *understandable & concise* do you think the solution is?
+   - *Perceived tool quality* (Editor, IDE, Debugger, Visualization, etc.)
+     + how *useful* do you think it is?
+     + how *easy to use* does it seem to be?
+
+* Awards
+
+  1. The best overall solution
+  2. The most efficient solution
+  3. The most concise & understandable solution
+  4. The best solution for
+     - Task 1 and 3.1 (M2M)
+     - Task 2 (control flow synthesis)
+     - Task 3 (data flow synthesis)
+     - Task 4 (validation/DSL)

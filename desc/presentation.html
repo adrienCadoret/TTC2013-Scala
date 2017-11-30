@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><title>(The TTC 2013 Flowgraphs Case)</title>
+<meta name="author" content="(Tassilo Horn)"/>
+<link rel="stylesheet" href="http://www.tsdh.org/js/reveal.js/css/reveal.min.css">
+<link rel="stylesheet" href="http://www.tsdh.org/js/reveal.js/css/theme/night.css" id="theme">
+<link rel="stylesheet" href="./extra.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<h2>The TTC 2013 Flowgraphs Case</h2>
+<br style="clear:both;" />
+<h2>Tassilo Horn</h2>
+<h3><a href="mailto:horn@uni-koblenz.de">horn@uni-koblenz.de</a></h3>
+<h2>June 20th, 2013</h2></section>
+
+<section id="sec-1" >
+
+<h2>The 4 Flowgraph Tasks</h2>
+<ol class="org-ol">
+<li>A <b>model-to-model transformation</b> from JaMoPP to a simple StructureGraph
+</li>
+<li>An <b>in-place transformation</b> synthesizing control flow edges
+</li>
+<li>An <b>in-place transformation</b> synthesizing data flow edges
+</li>
+<li>A <b>DSL development</b> task for <b>validation</b>
+</li>
+</ol>
+</section>
+<section id="sec-2" >
+
+<h2>Task 1</h2>
+<ul class="org-ul">
+<li>Model-to-model transformation
+<ul class="org-ul">
+<li>Transform JaMoPP to StructureGraph
+</li>
+</ul>
+</li>
+<li>Model-to-text transformation
+<ul class="org-ul">
+<li>Serialize JaMoPP statements back to text
+</li>
+</ul>
+</li>
+</ul>
+
+</section>
+<section>
+<section id="sec-2-1" >
+
+<h3>Task 1: Metamodels</h3>
+<ul class="org-ul">
+<li>Input metamodel (JaMoPP, complete abstract syntax of Java)
+<ul class="org-ul">
+<li>237 classes,15 attributes, 105 references, 319 specializations
+</li>
+</ul>
+</li>
+<li>Output metamodel (StructureGraph)
+    <img  src="./StructureGraph.png" alt="StructureGraph.png" />
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-2-2" >
+
+<h3>Task 1: Models</h3>
+<ul class="org-ul">
+<li>smallest input model: 53 objects, 67 references
+</li>
+<li>largest input model: 48465 objects, 60367 references
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-2-3" >
+
+<h3>Task 1: Example</h3>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #20b2aa; font-weight: bold;">public</span> <span style="color: #20b2aa; font-weight: bold;">class</span> <span style="color: #9370db;">Test1</span> {
+        <span style="color: #20b2aa; font-weight: bold;">public</span> <span style="color: #20b2aa; font-weight: bold;">static</span> <span style="color: #9370db;">void</span> <span style="color: #00ff7f;">testMethod</span>(<span style="color: #9370db;">int</span> <span style="color: #9acd32;">a</span>) {
+                <span style="color: #9370db;">int</span> <span style="color: #9acd32;">i</span> = a * 2;
+                i = i + 19;
+                <span style="color: #20b2aa; font-weight: bold;">while</span> (i &gt; a) {
+                        <span style="color: #20b2aa; font-weight: bold;">if</span> (a &lt; 1) {
+                                <span style="color: #20b2aa; font-weight: bold;">return</span>;
+                        } <span style="color: #20b2aa; font-weight: bold;">else</span> <span style="color: #20b2aa; font-weight: bold;">if</span> (a == 1) {
+                                <span style="color: #20b2aa; font-weight: bold;">break</span>;
+                        }
+                        i--;
+                }
+        }
+}
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-2-4" >
+
+<h3><img  src="./sg.png" alt="sg.png" /></h3>
+</section>
+</section>
+<section id="sec-3" >
+
+<h2>Task 2</h2>
+<ul class="org-ul">
+<li>In-place transformation
+</li>
+<li><b>Synthesize control flow edges</b> in the StructureGraphs according to the
+Java semantics
+</li>
+<li>Not that easy in the presence of deeply nested <i>if/loops</i> with <i>break</i> and
+    <i>continue</i>
+</li>
+</ul>
+
+</section>
+<section>
+<section id="sec-3-1" >
+
+<h3>Task 2: Metamodel</h3>
+
+<div class="figure">
+<p><img  src="./ControlFlowGraph.png" alt="ControlFlowGraph.png" /></p>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-3-2" >
+
+<h3><img  src="./sg.png" alt="sg.png" /></h3>
+</section>
+
+</section>
+<section>
+<section id="sec-3-3" >
+
+<h3><img  src="./cfg.png" alt="cfg.png" /></h3>
+</section>
+</section>
+<section id="sec-4" >
+
+<h2>Task 3</h2>
+<ul class="org-ul">
+<li>Model-to-model transformation
+<ul class="org-ul">
+<li>Extend task 1's transformation so that it creates <i>Var</i> objects and sets
+      <i>def</i> and <i>use</i> references
+</li>
+</ul>
+</li>
+<li>In-place transformation
+<ul class="org-ul">
+<li><b>Synthesize data flow edges</b> in the model resulting from applying the
+extended task 1 transformation + the task 2 transformation
+</li>
+</ul>
+</li>
+</ul>
+
+</section>
+<section>
+<section id="sec-4-1" >
+
+<h3>Task 3: Metamodel</h3>
+
+<div class="figure">
+<p><img  src="./DataFlowGraph.png" alt="DataFlowGraph.png" /></p>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-4-2" >
+
+<h3><img  src="./cfg-with-vars.png" alt="cfg-with-vars.png" /></h3>
+</section>
+
+</section>
+<section>
+<section id="sec-4-3" >
+
+<h3><img  src="./dfg.png" alt="dfg.png" /></h3>
+</section>
+</section>
+<section id="sec-5" >
+
+<h2>Task 4</h2>
+<ul class="org-ul">
+<li>Create a <b>simple DSL</b> that allows for
+<ul class="org-ul">
+<li>defining <b>specs of expected control and data flow links</b>
+</li>
+<li>using a syntax usable by Java programmers not knowing about models
+</li>
+</ul>
+</li>
+<li>Provide a tool that takes such specs to <b>validate result model</b>
+<ul class="org-ul">
+<li>Enumerate missing control/data flow links
+</li>
+<li>Enumerate false control/data flow links
+</li>
+</ul>
+</li>
+</ul>
+
+</section>
+<section>
+<section id="sec-5-1" >
+
+<h3>Task 4: Example DSL</h3>
+<pre class="example">
+cfNext: "testMethod()"   --&gt; "int a = 1;"
+cfNext: "int a = 1;"     --&gt; "int b = 2;"
+cfNext: "int b = 2;"     --&gt; "int c = a + b;"
+cfNext: "int c = a + b;" --&gt; "a = c;"
+cfNext: "a = c;"         --&gt; "b = a;"
+cfNext: "b = a;"         --&gt; "c = a / b;"
+cfNext: "c = a / b;"     --&gt; "b = a - b;"
+cfNext: "b = a - b;"     --&gt; "return b * c;"
+cfNext: "return b * c;"  --&gt; "Exit"
+
+dfNext: "int a = 1;"     --&gt; "int c = a + b;"
+dfNext: "int b = 2;"     --&gt; "int c = a + b;"
+dfNext: "int c = a + b;" --&gt; "a = c;"
+dfNext: "a = c;"         --&gt; "b = a;"
+dfNext: "a = c;"         --&gt; "c = a / b;"
+dfNext: "a = c;"         --&gt; "b = a - b;"
+dfNext: "b = a;"         --&gt; "c = a / b;"
+dfNext: "b = a;"         --&gt; "b = a - b;"
+dfNext: "c = a / b;"     --&gt; "return b * c;"
+dfNext: "b = a - b;"     --&gt; "return b * c;"
+</pre>
+</section>
+</section>
+<section id="sec-6" >
+
+<h2>Evaluation Criteria</h2>
+</section>
+<section>
+<section id="sec-6-1" >
+
+<h3>Objective Criteria</h3>
+<ul class="org-ul">
+<li>The objectively measurable criteria have already been assessed in an open
+peer review
+<ul class="org-ul">
+<li><b>Completeness</b>
+</li>
+<li><b>Correctness</b>
+</li>
+<li><b>Efficiency</b>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-6-2" >
+
+<h3>Subjective Criteria</h3>
+<ul class="org-ul">
+<li>Have also been assessed in an open peer review, and now you can add your
+votes, too
+</li>
+<li><b>Overall score</b>
+<ul class="org-ul">
+<li>of the solution itself (i.e., its results)
+</li>
+<li>of the solution presentation
+</li>
+</ul>
+</li>
+<li><b>Perceived language quality</b>
+<ul class="org-ul">
+<li>how <b>useful</b> do you think it is?
+</li>
+<li>how <b>easy to use</b> does it seem to be?
+</li>
+<li>how <b>understandable &amp; concise</b> do you think the solution is?
+</li>
+</ul>
+</li>
+<li><b>Perceived tool quality</b> (Editor, IDE, Debugger, Visualization, etc.)
+<ul class="org-ul">
+<li>how <b>useful</b> do you think it is?
+</li>
+<li>how <b>easy to use</b> does it seem to be?
+</li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="sec-7" >
+
+<h2>Awards</h2>
+<ol class="org-ol">
+<li>The best overall solution
+</li>
+<li>The most efficient solution
+</li>
+<li>The most concise &amp; understandable solution
+</li>
+<li>The best solution for
+<ul class="org-ul">
+<li>Task 1 and 3.1 (M2M)
+</li>
+<li>Task 2 (control flow synthesis)
+</li>
+<li>Task 3 (data flow synthesis)
+</li>
+<li>Task 4 (validation/DSL)
+</li>
+</ul>
+</li>
+</ol>
+</section>
+</div>
+</div>
+<script src="http://www.tsdh.org/js/reveal.js/lib/js/head.min.js"></script>
+<script src="http://www.tsdh.org/js/reveal.js/js/reveal.min.js"></script>
+<script>
+
+        		// Full list of configuration options available here:
+        		// https://github.com/hakimel/reveal.js#configuration
+        		Reveal.initialize({
+        			controls: true,
+        			progress: true,
+        			history: true,
+        			center: true,
+        			rollingLinks: true,
+        			keyboard: true,
+        			overview: true,
+
+        			theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        			transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+        			transitionSpeed: 'default',
+
+        			// Optional libraries used to extend on reveal.js
+        			dependencies: [
+        				{ src: 'http://www.tsdh.org/js/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+        				{ src: 'http://www.tsdh.org/js/reveal.js/plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        				{ src: 'http://www.tsdh.org/js/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        				{ src: 'http://www.tsdh.org/js/reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+        				{ src: 'http://www.tsdh.org/js/reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+        				{ src: 'http://www.tsdh.org/js/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        				// { src: 'http://www.tsdh.org/js/reveal.js/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+        				// { src: 'http://www.tsdh.org/js/reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+        			]
+        		});
+</script>
+</body>
+</html>
